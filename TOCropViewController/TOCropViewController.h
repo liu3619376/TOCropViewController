@@ -27,14 +27,16 @@
 
 typedef NS_ENUM(NSInteger, TOCropViewControllerAspectRatioPreset) {
     TOCropViewControllerAspectRatioPresetOriginal,
+    TOCropViewControllerAspectRatioPresetCustom,
     TOCropViewControllerAspectRatioPresetSquare,
     TOCropViewControllerAspectRatioPreset3x2,
-    TOCropViewControllerAspectRatioPreset5x3,
+    TOCropViewControllerAspectRatioPreset3x4,
     TOCropViewControllerAspectRatioPreset4x3,
+    TOCropViewControllerAspectRatioPreset5x3,
     TOCropViewControllerAspectRatioPreset5x4,
     TOCropViewControllerAspectRatioPreset7x5,
     TOCropViewControllerAspectRatioPreset16x9,
-    TOCropViewControllerAspectRatioPresetCustom
+    
 };
 
 typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
@@ -53,16 +55,16 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
 @optional
 
 /**
- Called when the user has committed the crop action, and provides 
+ Called when the user has committed the crop action, and provides
  just the cropping rectangle.
-
+ 
  @param cropRect A rectangle indicating the crop region of the image the user chose (In the original image's local co-ordinate space)
  @param angle The angle of the image when it was cropped
  */
 - (void)cropViewController:(nonnull TOCropViewController *)cropViewController didCropImageToRect:(CGRect)cropRect angle:(NSInteger)angle NS_SWIFT_NAME(cropViewController(_:didCropToRect:angle:));
 
 /**
- Called when the user has committed the crop action, and provides 
+ Called when the user has committed the crop action, and provides
  both the original image with crop co-ordinates.
  
  @param image The newly cropped image.
@@ -82,7 +84,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
 - (void)cropViewController:(nonnull TOCropViewController *)cropViewController didCropToCircularImage:(nonnull UIImage *)image withRect:(CGRect)cropRect angle:(NSInteger)angle NS_SWIFT_NAME(cropViewController(_:didCropToCircleImage:rect:angle:));
 
 /**
- If implemented, when the user hits cancel, or completes a 
+ If implemented, when the user hits cancel, or completes a
  UIActivityViewController operation, this delegate will be called,
  giving you a chance to manually dismiss the view controller
  
@@ -115,7 +117,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  */
 @property (nonnull, nonatomic, strong, readonly) TOCropView *cropView;
 
-/** 
+/**
  In the coordinate space of the image itself, the region that is currently
  being highlighted by the crop box.
  
@@ -128,7 +130,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  The angle in which the image is rotated in the crop view.
  This can only be in 90 degree increments (eg, 0, 90, 180, 270).
  
- This property can be set before the controller is presented to have 
+ This property can be set before the controller is presented to have
  the image 'restored' to a previous cropping layout.
  */
 @property (nonatomic, assign) NSInteger angle;
@@ -169,7 +171,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  */
 @property (nonatomic, assign) BOOL aspectRatioLockEnabled;
 
-/** 
+/**
  If true, tapping the reset button will also reset the aspect ratio back to the image
  default ratio. Otherwise, the reset will just zoom out to the current aspect ratio.
  
@@ -186,7 +188,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
 @property (nonatomic, assign) TOCropViewControllerToolbarPosition toolbarPosition;
 
 /**
- When disabled, an additional rotation button that rotates the canvas in 
+ When disabled, an additional rotation button that rotates the canvas in
  90-degree segments in a clockwise direction is shown in the toolbar.
  
  Default is YES.
@@ -194,7 +196,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
 @property (nonatomic, assign) BOOL rotateClockwiseButtonHidden;
 
 /**
- When enabled, hides the rotation button, as well as the alternative rotation 
+ When enabled, hides the rotation button, as well as the alternative rotation
  button visible when `showClockwiseRotationButton` is set to YES.
  
  Default is NO.
@@ -208,23 +210,23 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  */
 @property (nonatomic, assign) BOOL aspectRatioPickerButtonHidden;
 
-/** 
- If `showActivitySheetOnDone` is true, then these activity items will 
- be supplied to that UIActivityViewController in addition to the 
+/**
+ If `showActivitySheetOnDone` is true, then these activity items will
+ be supplied to that UIActivityViewController in addition to the
  `TOActivityCroppedImageProvider` object.
  */
 @property (nullable, nonatomic, strong) NSArray *activityItems;
 
 /**
- If `showActivitySheetOnDone` is true, then you may specify any 
- custom activities your app implements in this array. If your activity requires 
- access to the cropping information, it can be accessed in the supplied 
+ If `showActivitySheetOnDone` is true, then you may specify any
+ custom activities your app implements in this array. If your activity requires
+ access to the cropping information, it can be accessed in the supplied
  `TOActivityCroppedImageProvider` object
  */
 @property (nullable, nonatomic, strong) NSArray *applicationActivities;
 
 /**
- If `showActivitySheetOnDone` is true, then you may expliclty 
+ If `showActivitySheetOnDone` is true, then you may expliclty
  set activities that won't appear in the share sheet here.
  */
 @property (nullable, nonatomic, strong) NSArray *excludedActivityTypes;
@@ -278,7 +280,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  */
 - (nonnull instancetype)initWithImage:(nonnull UIImage *)image NS_SWIFT_NAME(init(image:));
 
-/** 
+/**
  Creates a new instance of a crop view controller with the supplied image and cropping style
  
  @param style The cropping style that will be used with this view controller (eg, rectangular, or circular)
@@ -291,7 +293,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
  */
 - (void)resetCropViewLayout;
 
-/** 
+/**
  Set the aspect ratio to be one of the available preset options. These presets have specific behaviour
  such as swapping their dimensions depending on portrait or landscape sized images.
  
@@ -302,7 +304,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
 
 /**
  Play a custom animation of the target image zooming to its position in
- the crop controller while the background fades in. 
+ the crop controller while the background fades in.
  
  @param viewController The parent controller that this view controller would be presenting from.
  @param fromView A view that's frame will be used as the origin for this animation. Optional if `fromFrame` has a value.
@@ -318,7 +320,7 @@ typedef NS_ENUM(NSInteger, TOCropViewControllerToolbarPosition) {
 
 /**
  Play a custom animation of the target image zooming to its position in
- the crop controller while the background fades in. Additionally, if you're 
+ the crop controller while the background fades in. Additionally, if you're
  'restoring' to a previous crop setup, this method lets you provide a previously
  cropped copy of the image, and the previous crop settings to transition back to
  where the user would have left off.

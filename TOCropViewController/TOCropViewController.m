@@ -28,6 +28,9 @@
 
 static const CGFloat kTOCropViewControllerTitleTopPadding = 14.0f;
 
+#define UIColorFromHex(s)  [UIColor colorWithRed:(((s & 0xFF0000) >> 16))/255.0 green:(((s &0xFF00) >>8))/255.0 blue:((s &0xFF))/255.0 alpha:1.0]
+
+
 @interface TOCropViewController () <UIActionSheetDelegate, UIViewControllerTransitioningDelegate, TOCropViewDelegate>
 
 /* The target image */
@@ -40,6 +43,7 @@ static const CGFloat kTOCropViewControllerTitleTopPadding = 14.0f;
 @property (nonatomic, strong) TOCropToolbar *toolbar;
 @property (nonatomic, strong, readwrite) TOCropView *cropView;
 @property (nonatomic, strong) UIView *toolbarSnapshotView;
+@property (nonatomic, strong) UIView *toolbarClampView;
 @property (nonatomic, strong, readwrite) UILabel *titleLabel;
 
 /* Transition animation controller */
@@ -70,7 +74,7 @@ CGFloat titleLabelHeight;
 - (instancetype)initWithCroppingStyle:(TOCropViewCroppingStyle)style image:(UIImage *)image
 {
     NSParameterAssert(image);
-
+    
     self = [super init];
     if (self) {
         self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
@@ -84,10 +88,10 @@ CGFloat titleLabelHeight;
         _aspectRatioPreset = TOCropViewControllerAspectRatioPresetOriginal;
         _toolbarPosition = TOCropViewControllerToolbarPositionBottom;
         _rotateClockwiseButtonHidden = YES;
-		
-		titleLabelHeight = 0.0f;
+        
+        titleLabelHeight = 0.0f;
     }
-	
+    
     return self;
 }
 
@@ -100,10 +104,10 @@ CGFloat titleLabelHeight;
 {
     [super viewDidLoad];
     BOOL circularMode = (self.croppingStyle == TOCropViewCroppingStyleCircular);
-
+    
     self.cropView.frame = [self frameForCropViewWithVerticalLayout:self.verticalLayout];
     self.toolbar.frame = [self frameForToolBarWithVerticalLayout:self.verticalLayout];
-
+    
     __weak typeof(self) weakSelf = self;
     self.toolbar.doneButtonTapped   = ^{ [weakSelf doneButtonTapped]; };
     self.toolbar.cancelButtonTapped = ^{ [weakSelf cancelButtonTapped]; };
@@ -119,6 +123,13 @@ CGFloat titleLabelHeight;
     
     self.transitioningDelegate = self;
     self.view.backgroundColor = self.cropView.backgroundColor;
+    
+    self.toolbarClampView = [[UIView alloc] initWithFrame:CGRectMake(0, CGRectGetHeight(self.view.frame)-CGRectGetHeight(self.toolbar.frame)-50, CGRectGetWidth(self.view.frame), 50)];
+    self.toolbarClampView.backgroundColor = UIColorFromHex(0xF5F3F2);
+    [self.view addSubview:self.toolbarClampView];
+    
+    [self loadingClampNewView];
+    self.toolbarClampView.hidden = true;
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -143,7 +154,7 @@ CGFloat titleLabelHeight;
         [self.cropView setBackgroundImageViewHidden:YES animated:NO];
         self.titleLabel.alpha = 0.0f;
     }
-
+    
     if (self.aspectRatioPreset != TOCropViewControllerAspectRatioPresetOriginal) {
         [self setAspectRatioPreset:self.aspectRatioPreset animated:NO];
     }
@@ -154,12 +165,12 @@ CGFloat titleLabelHeight;
     [super viewDidAppear:animated];
     self.inTransition = NO;
     self.cropView.simpleRenderMode = NO;
-
+    
     void (^updateContentBlock)(void) = ^{
         [self setNeedsStatusBarAppearanceUpdate];
         self.titleLabel.alpha = 1.0f;
     };
-
+    
     if (animated) {
         [UIView animateWithDuration:0.3f animations:updateContentBlock];
     }
@@ -268,28 +279,28 @@ CGFloat titleLabelHeight;
     else {
         bounds = self.parentViewController.view.bounds;
     }
-	
-	
+    
+    
     CGRect frame = CGRectZero;
     if (!verticalLayout) {
         frame.origin.x = 44.0f;
-		frame.origin.y = 0.0f;
-		
+        frame.origin.y = 0.0f;
+        
         frame.size.width = CGRectGetWidth(bounds) - 44.0f;
-		frame.size.height = CGRectGetHeight(bounds);
-		
+        frame.size.height = CGRectGetHeight(bounds);
+        
     }
     else {
         frame.origin.x = 0.0f;
         
         if (_toolbarPosition == TOCropViewControllerToolbarPositionBottom) {
-			frame.origin.y = 0.0f;
+            frame.origin.y = 0.0f;
         } else {
-			frame.origin.y = 44.0f;
+            frame.origin.y = 44.0f;
         }
-
+        
         frame.size.width = CGRectGetWidth(bounds);
-		frame.size.height = CGRectGetHeight(bounds) - 44.0f;
+        frame.size.height = CGRectGetHeight(bounds) - 84.0f;
     }
     
     return frame;
@@ -299,16 +310,16 @@ CGFloat titleLabelHeight;
 {
     CGRect frame = (CGRect){CGPointZero, size};
     CGFloat width = self.view.bounds.size.width;
-
+    
     if (!verticalLayout) {
         width -= 44.0f;
     }
-
+    
     frame.origin.x = ceilf((width - frame.size.width) * 0.5f);
     if (!verticalLayout) { frame.origin.x += 44.0f; }
-
+    
     frame.origin.y = self.topLayoutGuide.length + kTOCropViewControllerTitleTopPadding;
-
+    
     return frame;
 }
 
@@ -318,28 +329,28 @@ CGFloat titleLabelHeight;
         self.cropView.cropRegionInsets = UIEdgeInsetsZero;
         return;
     }
-
+    
     CGFloat verticalInset = 0.0f; // self.topLayoutGuide.length; // status bar //FIXME: Is this ever needed?
     verticalInset += kTOCropViewControllerTitleTopPadding;
     verticalInset += self.titleLabel.frame.size.height;
-
+    
     self.cropView.cropRegionInsets = UIEdgeInsetsMake(verticalInset, 0, 0, 0);
 }
 
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-
+    
     self.cropView.frame = [self frameForCropViewWithVerticalLayout:self.verticalLayout];
     [self.cropView moveCroppedContentToCenterAnimated:NO];
-
+    
     if (self.title.length) {
         [self.titleLabel sizeToFit];
         self.titleLabel.frame = [self frameForTitleLabelWithSize:self.titleLabel.frame.size verticalLayout:self.verticalLayout];
         [self adjustCropViewInsetsForTitleLabel];
         [self.cropView moveCroppedContentToCenterAnimated:NO];
     }
-
+    
     [UIView performWithoutAnimation:^{
         self.toolbar.statusBarVisible = (self.toolbarPosition == TOCropViewControllerToolbarPositionTop && !self.prefersStatusBarHidden);
         self.toolbar.frame = [self frameForToolBarWithVerticalLayout:self.verticalLayout];
@@ -374,7 +385,7 @@ CGFloat titleLabelHeight;
     self.cropView.frame = [self frameForCropViewWithVerticalLayout:!UIInterfaceOrientationIsPortrait(toInterfaceOrientation)];
     self.cropView.simpleRenderMode = YES;
     self.cropView.internalLayoutDisabled = YES;
-
+    
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
@@ -402,8 +413,8 @@ CGFloat titleLabelHeight;
     
     [self.cropView setSimpleRenderMode:NO animated:YES];
     self.cropView.internalLayoutDisabled = NO;
-	
-	self.titleLabel.frame = CGRectMake(0, 0, self.view.frame.size.width, titleLabelHeight);
+    
+    self.titleLabel.frame = CGRectMake(0, 0, self.view.frame.size.width, titleLabelHeight);
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
@@ -427,6 +438,7 @@ CGFloat titleLabelHeight;
 #pragma mark - Reset -
 - (void)resetCropViewLayout
 {
+    self.toolbarClampView.hidden = true;
     BOOL animated = (self.cropView.angle == 0);
     
     if (self.resetAspectRatioEnabled) {
@@ -436,18 +448,8 @@ CGFloat titleLabelHeight;
     [self.cropView resetLayoutToDefaultAnimated:animated];
 }
 
-#pragma mark - Aspect Ratio Handling -
-- (void)showAspectRatioDialog
+-(void)loadingClampNewView
 {
-    if (self.cropView.aspectRatioLockEnabled) {
-        self.cropView.aspectRatioLockEnabled = NO;
-        self.toolbar.clampButtonGlowing = NO;
-        return;
-    }
-    
-    //Depending on the shape of the image, work out if horizontal, or vertical options are required
-    BOOL verticalCropBox = self.cropView.cropBoxAspectRatioIsPortrait;
-    
     // In CocoaPods, strings are stored in a separate bundle from the main one
     NSBundle *resourceBundle = nil;
     NSBundle *classBundle = [NSBundle bundleForClass:[self class]];
@@ -459,77 +461,94 @@ CGFloat titleLabelHeight;
         resourceBundle = classBundle;
     }
     
+    
     //Prepare the localized options
     NSString *cancelButtonTitle = NSLocalizedStringFromTableInBundle(@"Cancel", @"TOCropViewControllerLocalizable", resourceBundle, nil);
     NSString *originalButtonTitle = NSLocalizedStringFromTableInBundle(@"Original", @"TOCropViewControllerLocalizable", resourceBundle, nil);
     NSString *squareButtonTitle = NSLocalizedStringFromTableInBundle(@"Square", @"TOCropViewControllerLocalizable", resourceBundle, nil);
+    NSString *customButtonTitle = NSLocalizedStringFromTableInBundle(@"Custom", @"TOCropViewControllerLocalizable", resourceBundle, nil);
     
     //Prepare the list that will be fed to the alert view/controller
     NSMutableArray *items = [NSMutableArray array];
     [items addObject:originalButtonTitle];
+    [items addObject:customButtonTitle];
     [items addObject:squareButtonTitle];
-    if (verticalCropBox) {
-        [items addObjectsFromArray:@[@"2:3", @"3:5", @"3:4", @"4:5", @"5:7", @"9:16"]];
-    }
-    else {
-        [items addObjectsFromArray:@[@"3:2", @"5:3", @"4:3", @"5:4", @"7:5", @"16:9"]];
-    }
+    [items addObjectsFromArray:@[@"3:4", @"4:3"]];
+    //    if (verticalCropBox) {
+    //        [items addObjectsFromArray:@[@"2:3", @"3:4", @"4:3", @"4:5", @"5:7", @"9:16"]];
+    //    }
+    //    else {
+    //        [items addObjectsFromArray:@[@"3:2", @"5:3", @"4:3", @"5:4", @"7:5", @"16:9"]];
+    //    }
     
     //Present via a UIAlertController if >= iOS 8
-    if (NSClassFromString(@"UIAlertController")) {
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-        [alertController addAction:[UIAlertAction actionWithTitle:cancelButtonTitle style:UIAlertActionStyleCancel handler:nil]];
+    CGFloat sppace = (CGRectGetWidth(self.view.bounds)-250)/6;
+    
+    NSArray *imgarry = @[@"ClampOri@3x",@"Clampfree@3x",@"Clampfree@3x",@"Clamp34@3x",@"Clamp43@3x"];
+    NSInteger i = 0;
+    for (NSString *item in items)
+    {
         
-        //Add each item to the alert controller
-        NSInteger i = 0;
-        for (NSString *item in items) {
-            UIAlertAction *action = [UIAlertAction actionWithTitle:item style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                [self setAspectRatioPreset:(TOCropViewControllerAspectRatioPreset)i animated:YES];
-                self.aspectRatioLockEnabled = YES;
-            }];
-            [alertController addAction:action];
-            
-            i++;
+        UIButton *clampbutton = [UIButton buttonWithType:UIButtonTypeCustom];
+        //图文居中
+        clampbutton.frame = CGRectMake(sppace+(50+sppace)*i, 0, 50, 50);
+        [clampbutton.titleLabel setFont:[UIFont systemFontOfSize:11]];
+        [clampbutton setTitleColor:UIColorFromHex(0x3B3635) forState:0];
+        [clampbutton setTitle:item forState:UIControlStateNormal];
+        
+        [clampbutton setImage:[UIImage imageWithContentsOfFile:[resourceBundle pathForResource:imgarry[i] ofType:@"png"]] forState:UIControlStateNormal];
+        CGSize imageSize = clampbutton.imageView.frame.size;
+        CGSize titleSize = clampbutton.titleLabel.frame.size;
+        CGFloat totalHeight = (imageSize.height + titleSize.height + 5);
+        if (i == 0) {
+            clampbutton.imageEdgeInsets = UIEdgeInsetsMake(- (totalHeight - imageSize.height), 0.0, 0.0, -10);
         }
-        
-        alertController.modalPresentationStyle = UIModalPresentationPopover;
-        UIPopoverPresentationController *presentationController = [alertController popoverPresentationController];
-        presentationController.sourceView = self.toolbar;
-        presentationController.sourceRect = self.toolbar.clampButtonFrame;
-        [self presentViewController:alertController animated:YES completion:nil];
-    }
-    else {
-        
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_8_0
-    //TODO: Completely overhaul this once iOS 7 support is dropped
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                                 delegate:self
-                                                        cancelButtonTitle:cancelButtonTitle
-                                                   destructiveButtonTitle:nil
-                                                        otherButtonTitles:nil];
-        
-        for (NSString *item in items) {
-            [actionSheet addButtonWithTitle:item];
-        }
-        
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-            [actionSheet showFromRect:self.toolbar.clampButtonFrame inView:self.toolbar animated:YES];
         else
-            [actionSheet showInView:self.view];
-#pragma clang diagnostic pop
-#endif
+        {
+            clampbutton.imageEdgeInsets = UIEdgeInsetsMake(- (totalHeight - imageSize.height), 0.0, 0.0, - titleSize.width);
+        }
+        
+        clampbutton.titleEdgeInsets = UIEdgeInsetsMake(0, - imageSize.width, - (totalHeight - titleSize.height), 0);
+        
+        
+        [self.toolbarClampView addSubview:clampbutton];
+        clampbutton.tag = i;
+        [clampbutton addTarget:self action:@selector(selectClampbu:) forControlEvents:UIControlEventTouchUpInside];
+        i++;
+        
     }
+}
+#pragma mark - Aspect Ratio Handling -
+- (void)showAspectRatioDialog
+{
+    if (self.cropView.aspectRatioLockEnabled) {
+        self.cropView.aspectRatioLockEnabled = NO;
+        //self.toolbar.clampButtonGlowing = NO;
+        return;
+    }
+    
+    
+    self.toolbarClampView.hidden = false;
+    //Depending on the shape of the image, work out if horizontal, or vertical options are required
+    BOOL verticalCropBox = self.cropView.cropBoxAspectRatioIsPortrait;
+    
+    
+    
+    
+    
+}
+
+-(void)selectClampbu:(UIButton*)btr
+{
+    
+    self.aspectRatioLockEnabled = YES;
+    [self setAspectRatioPreset:(TOCropViewControllerAspectRatioPreset)btr.tag animated:YES];
+    
 }
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex
-{
-    [self setAspectRatioPreset:(TOCropViewControllerAspectRatioPreset)buttonIndex animated:YES];
-    self.aspectRatioLockEnabled = YES;
-}
+
 #pragma clang diagnostic pop
 
 - (void)setAspectRatioPreset:(TOCropViewControllerAspectRatioPreset)aspectRatioPreset animated:(BOOL)animated
@@ -542,17 +561,23 @@ CGFloat titleLabelHeight;
         case TOCropViewControllerAspectRatioPresetOriginal:
             aspectRatio = CGSizeZero;
             break;
+        case TOCropViewControllerAspectRatioPresetCustom:
+            aspectRatio = CGSizeMake(1.0f, 1.0f);//aspectRatio = self.customAspectRatio;
+            break;
         case TOCropViewControllerAspectRatioPresetSquare:
             aspectRatio = CGSizeMake(1.0f, 1.0f);
             break;
-        case TOCropViewControllerAspectRatioPreset3x2:
-            aspectRatio = CGSizeMake(3.0f, 2.0f);
-            break;
-        case TOCropViewControllerAspectRatioPreset5x3:
-            aspectRatio = CGSizeMake(5.0f, 3.0f);
+            //        case TOCropViewControllerAspectRatioPreset3x2:
+            //            aspectRatio = CGSizeMake(3.0f, 2.0f);
+            //            break;
+        case TOCropViewControllerAspectRatioPreset3x4:
+            aspectRatio = CGSizeMake(3.0f, 4.0f);
             break;
         case TOCropViewControllerAspectRatioPreset4x3:
             aspectRatio = CGSizeMake(4.0f, 3.0f);
+            break;
+        case TOCropViewControllerAspectRatioPreset5x3:
+            aspectRatio = CGSizeMake(5.0f, 3.0f);
             break;
         case TOCropViewControllerAspectRatioPreset5x4:
             aspectRatio = CGSizeMake(5.0f, 4.0f);
@@ -563,9 +588,7 @@ CGFloat titleLabelHeight;
         case TOCropViewControllerAspectRatioPreset16x9:
             aspectRatio = CGSizeMake(16.0f, 9.0f);
             break;
-        case TOCropViewControllerAspectRatioPresetCustom:
-            aspectRatio = self.customAspectRatio;
-            break;
+            
     }
     
     //If the image is a portrait shape, flip the aspect ratio to match
@@ -579,15 +602,20 @@ CGFloat titleLabelHeight;
     }
     
     [self.cropView setAspectRatio:aspectRatio animated:animated];
+    if (aspectRatioPreset == TOCropViewControllerAspectRatioPresetCustom) {
+        self.aspectRatioLockEnabled = NO;
+    }
 }
 
 - (void)rotateCropViewClockwise
 {
+    self.toolbarClampView.hidden = true;
     [self.cropView rotateImageNinetyDegreesAnimated:YES clockwise:YES];
 }
 
 - (void)rotateCropViewCounterclockwise
 {
+    self.toolbarClampView.hidden = true;
     [self.cropView rotateImageNinetyDegreesAnimated:YES clockwise:NO];
 }
 
@@ -675,7 +703,7 @@ CGFloat titleLabelHeight;
     self.transitionController.toView    = toView;
     self.transitionController.toFrame   = frame;
     self.prepareForTransitionHandler    = setup;
-
+    
     [viewController dismissViewControllerAnimated:YES completion:^ {
         if (completion) {
             completion();
@@ -700,7 +728,7 @@ CGFloat titleLabelHeight;
         if (!CGRectIsEmpty(transitioning.fromFrame) || transitioning.fromView) {
             strongSelf.cropView.croppingViewsHidden = YES;
         }
-
+        
         if (strongSelf.prepareForTransitionHandler)
             strongSelf.prepareForTransitionHandler();
         
@@ -738,6 +766,7 @@ CGFloat titleLabelHeight;
 #pragma mark - Button Feedback -
 - (void)cancelButtonTapped
 {
+    self.toolbarClampView.hidden = true;
     bool isDelegateOrCallbackHandled = NO;
     
     if ([self.delegate respondsToSelector:@selector(cropViewController:didFinishCancelled:)]) {
@@ -769,9 +798,10 @@ CGFloat titleLabelHeight;
 
 - (void)doneButtonTapped
 {
+    self.toolbarClampView.hidden = true;
     CGRect cropFrame = self.cropView.imageCropFrame;
     NSInteger angle = self.cropView.angle;
-
+    
     //If desired, when the user taps done, show an activity sheet
     if (self.showActivitySheetOnDone) {
         TOActivityCroppedImageProvider *imageItem = [[TOActivityCroppedImageProvider alloc] initWithImage:self.image cropFrame:cropFrame angle:angle circular:(self.croppingStyle == TOCropViewCroppingStyleCircular)];
@@ -858,20 +888,20 @@ CGFloat titleLabelHeight;
         [self.delegate cropViewController:self didCropImageToRect:cropFrame angle:angle];
         isCallbackOrDelegateHandled = YES;
     }
-
+    
     if (self.onDidCropImageToRect != nil) {
         self.onDidCropImageToRect(cropFrame, angle);
         isCallbackOrDelegateHandled = YES;
     }
-
+    
     // Check if the circular APIs were implemented
     BOOL isCircularImageDelegateAvailable = [self.delegate respondsToSelector:@selector(cropViewController:didCropToCircularImage:withRect:angle:)];
     BOOL isCircularImageCallbackAvailable = self.onDidCropToCircleImage != nil;
-
+    
     // Check if non-circular was implemented
     BOOL isDidCropToImageDelegateAvailable = [self.delegate respondsToSelector:@selector(cropViewController:didCropToImage:withRect:angle:)];
     BOOL isDidCropToImageCallbackAvailable = self.onDidCropToRect != nil;
-
+    
     //If cropping circular and the circular generation delegate/block is implemented, call it
     if (self.croppingStyle == TOCropViewCroppingStyleCircular && (isCircularImageDelegateAvailable || isCircularImageCallbackAvailable)) {
         UIImage *image = [self.image croppedImageWithFrame:cropFrame angle:angle circularClip:YES];
@@ -922,14 +952,14 @@ CGFloat titleLabelHeight;
 - (void)setTitle:(NSString *)title
 {
     [super setTitle:title];
-
+    
     if (self.title.length == 0) {
         [_titleLabel removeFromSuperview];
         _cropView.cropRegionInsets = UIEdgeInsetsMake(0, 0, 0, 0);
         _titleLabel = nil;
         return;
     }
-
+    
     self.titleLabel.text = self.title;
     [self.titleLabel sizeToFit];
     self.titleLabel.frame = [self frameForTitleLabelWithSize:self.titleLabel.frame.size verticalLayout:self.verticalLayout];
@@ -958,7 +988,7 @@ CGFloat titleLabelHeight;
 {
     if (!self.title.length) { return nil; }
     if (_titleLabel) { return _titleLabel; }
-
+    
     _titleLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     _titleLabel.font = [UIFont boldSystemFontOfSize:15.0f];
     _titleLabel.backgroundColor = [UIColor clearColor];
@@ -968,9 +998,9 @@ CGFloat titleLabelHeight;
     _titleLabel.clipsToBounds = YES;
     _titleLabel.textAlignment = NSTextAlignmentCenter;
     _titleLabel.text = self.title;
-
+    
     [self.view insertSubview:self.titleLabel aboveSubview:self.cropView];
-
+    
     return _titleLabel;
 }
 
@@ -1074,3 +1104,4 @@ CGFloat titleLabelHeight;
 }
 
 @end
+

@@ -107,6 +107,10 @@
 		3AADDE231CA5C43400AE0129 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/TOCropViewControllerLocalizable.strings; sourceTree = "<group>"; };
 		6AE313501C47DAA200894C5B /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		6AE313511C47DAA200894C5B /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/TOCropViewControllerLocalizable.strings; sourceTree = "<group>"; };
+		CD5119651FB45CF80093BC5F /* Clampfree@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Clampfree@3x.png"; sourceTree = "<group>"; };
+		CD5119661FB45CF80093BC5F /* Clamp34@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Clamp34@3x.png"; sourceTree = "<group>"; };
+		CD5119671FB45CF80093BC5F /* Clamp43@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Clamp43@3x.png"; sourceTree = "<group>"; };
+		CD5119681FB45CF80093BC5F /* ClampOri@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ClampOri@3x.png"; sourceTree = "<group>"; };
 		CDC8C5751C667B9100BB86A4 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Main.strings; sourceTree = "<group>"; };
 		CDC8C5771C667B9100BB86A4 /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/TOCropViewControllerLocalizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -144,6 +148,10 @@
 				144B8CE31D22CE0D0085D774 /* TOCropViewController.h */,
 				22DB4D831B234CFA008B8466 /* TOCropViewController.m */,
 				22C3C5491AC8CA0D00E86280 /* TOCropViewControllerLocalizable.strings */,
+				CD5119661FB45CF80093BC5F /* Clamp34@3x.png */,
+				CD5119671FB45CF80093BC5F /* Clamp43@3x.png */,
+				CD5119651FB45CF80093BC5F /* Clampfree@3x.png */,
+				CD5119681FB45CF80093BC5F /* ClampOri@3x.png */,
 				2271B63D1DAAB59600AA147F /* TOCropViewController-Bridging-Header.h */,
 				146EFFB51D243822006CE3A0 /* Info.plist */,
 			);
@@ -336,6 +344,7 @@
 					};
 					223424691ABBC0CD00BBC2B1 = {
 						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = LPCE7977VR;
 					};
 				};
 			};
@@ -685,7 +694,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = LPCE7977VR;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -705,7 +714,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = LPCE7977VR;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
