@@ -460,7 +460,7 @@ CGFloat titleLabelHeight;
     else {
         resourceBundle = classBundle;
     }
-
+    
     
     //Prepare the localized options
     NSString *cancelButtonTitle = NSLocalizedStringFromTableInBundle(@"Cancel", @"TOCropViewControllerLocalizable", resourceBundle, nil);
@@ -484,7 +484,7 @@ CGFloat titleLabelHeight;
     //Present via a UIAlertController if >= iOS 8
     CGFloat sppace = (CGRectGetWidth(self.view.bounds)-250)/6;
     
-    NSArray *imgarry = @[@"ClampOri@3x",@"Clampfree@3x",@"Clampfree@3x",@"Clamp34@3x",@"Clamp43@3x"];
+    NSArray *imgarry = @[@"ClampOri",@"Clampfree",@"Clampfree",@"Clamp34",@"Clamp43"];
     NSInteger i = 0;
     for (NSString *item in items)
     {
@@ -502,6 +502,9 @@ CGFloat titleLabelHeight;
         CGFloat totalHeight = (imageSize.height + titleSize.height + 5);
         if (i == 0) {
             clampbutton.imageEdgeInsets = UIEdgeInsetsMake(- (totalHeight - imageSize.height), 0.0, 0.0, -10);
+        }
+        else if (i == 1) {
+            clampbutton.imageEdgeInsets = UIEdgeInsetsMake(- (totalHeight - imageSize.height), 0.0, 0.0, -22);
         }
         else
         {
