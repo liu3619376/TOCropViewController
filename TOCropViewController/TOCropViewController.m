@@ -460,8 +460,7 @@ CGFloat titleLabelHeight;
     else {
         resourceBundle = classBundle;
     }
-    NSURL *resourceURL = [classBundle URLForResource:@"TOCrop" withExtension:@"bundle"];
-    NSBundle *imgBuundle =[[NSBundle alloc] initWithURL:resourceURL];
+
     
     //Prepare the localized options
     NSString *cancelButtonTitle = NSLocalizedStringFromTableInBundle(@"Cancel", @"TOCropViewControllerLocalizable", resourceBundle, nil);
@@ -497,7 +496,7 @@ CGFloat titleLabelHeight;
         [clampbutton setTitleColor:UIColorFromHex(0x3B3635) forState:0];
         [clampbutton setTitle:item forState:UIControlStateNormal];
         
-        [clampbutton setImage:[UIImage imageWithContentsOfFile:[imgBuundle pathForResource:imgarry[i] ofType:@"png"]] forState:UIControlStateNormal];
+        [clampbutton setImage:[UIImage imageNamed:imgarry[i]] forState:UIControlStateNormal];
         CGSize imageSize = clampbutton.imageView.frame.size;
         CGSize titleSize = clampbutton.titleLabel.frame.size;
         CGFloat totalHeight = (imageSize.height + titleSize.height + 5);
