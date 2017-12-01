@@ -565,7 +565,7 @@ CGFloat titleLabelHeight;
             aspectRatio = CGSizeZero;
             break;
         case TOCropViewControllerAspectRatioPresetCustom:
-            aspectRatio = CGSizeMake(1.0f, 1.0f);//aspectRatio = self.customAspectRatio;
+            aspectRatio = self.customAspectRatio;
             break;
         case TOCropViewControllerAspectRatioPresetSquare:
             aspectRatio = CGSizeMake(1.0f, 1.0f);
