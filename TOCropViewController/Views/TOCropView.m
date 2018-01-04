@@ -264,6 +264,7 @@ typedef NS_ENUM(NSInteger, TOCropViewOverlayEdge) {
     self.gridPanGestureRecognizer.delegate = self;
     [self.scrollView.panGestureRecognizer requireGestureRecognizerToFail:self.gridPanGestureRecognizer];
     [self addGestureRecognizer:self.gridPanGestureRecognizer];
+    [self resetLayoutToDefaultAnimated:true];//原图裁剪
 }
 
 #pragma mark - View Layout -
